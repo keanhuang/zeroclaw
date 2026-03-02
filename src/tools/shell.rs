@@ -14,7 +14,7 @@ const MAX_OUTPUT_BYTES: usize = 1_048_576;
 /// Environment variables safe to pass to shell commands.
 /// Only functional variables are included — never API keys or secrets.
 const SAFE_ENV_VARS: &[&str] = &[
-    "PATH", "HOME", "TERM", "LANG", "LC_ALL", "LC_CTYPE", "USER", "SHELL", "TMPDIR",
+   "SystemRoot", "PATH", "HOME", "TERM", "LANG", "LC_ALL", "LC_CTYPE", "USER", "SHELL", "TMPDIR",
 ];
 
 /// Shell command execution tool with sandboxing
@@ -129,7 +129,8 @@ impl Tool for ShellTool {
                 error: Some("Rate limit exceeded: action budget exhausted".into()),
             });
         }
-
+        println!("");
+        println!("-------------------执行命令{}",&command);
         // Execute with timeout to prevent hanging commands.
         // Clear the environment to prevent leaking API keys and other secrets
         // (CWE-200), then re-add only safe, functional variables.
@@ -150,7 +151,9 @@ impl Tool for ShellTool {
 
         for var in collect_allowed_shell_env_vars(&self.security) {
             if let Ok(val) = std::env::var(&var) {
+                println!("env {},{}",&var,&val);
                 cmd.env(&var, val);
+                
             }
         }
 
@@ -171,7 +174,7 @@ impl Tool for ShellTool {
                     stderr.truncate(stderr.floor_char_boundary(MAX_OUTPUT_BYTES));
                     stderr.push_str("\n... [stderr truncated at 1MB]");
                 }
-
+                println!("-------------------result={},err={}",&stdout,&stderr);
                 Ok(ToolResult {
                     success: output.status.success(),
                     output: stdout,
@@ -182,11 +185,15 @@ impl Tool for ShellTool {
                     },
                 })
             }
-            Ok(Err(e)) => Ok(ToolResult {
+            Ok(Err(e)) => {
+                println!("error {}",&e);
+                Ok(ToolResult {
                 success: false,
                 output: String::new(),
                 error: Some(format!("Failed to execute command: {e}")),
-            }),
+            })
+         
+            }
             Err(_) => Ok(ToolResult {
                 success: false,
                 output: String::new(),

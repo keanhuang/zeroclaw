@@ -238,10 +238,16 @@ impl BrowserTool {
             native_state: tokio::sync::Mutex::new(native_backend::NativeBrowserState::default()),
         }
     }
-
+    fn get_agent_browser_command() -> String {
+        if OS == "windows" {
+            "agent-browser.cmd".to_string()
+        } else {
+            "agent-browser".to_string()
+        }
+    }
     /// Check if agent-browser CLI is available
     pub async fn is_agent_browser_available() -> bool {
-        Command::new("agent-browser")
+        Command::new(get_agent_browser_command())
             .arg("--version")
             .stdout(Stdio::null())
             .stderr(Stdio::null())
@@ -435,10 +441,16 @@ impl BrowserTool {
 
         Ok(())
     }
-
+    fn get_agent_browser_command() -> String {
+        if OS == "windows" {
+            "agent-browser.cmd".to_string()
+        } else {
+            "agent-browser".to_string()
+        }
+    }
     /// Execute an agent-browser command
     async fn run_command(&self, args: &[&str]) -> anyhow::Result<AgentBrowserResponse> {
-        let mut cmd = Command::new("agent-browser");
+        let mut cmd = Command::new(get_agent_browser_command());
 
         // Add session if configured
         if let Some(ref session) = self.session_name {
