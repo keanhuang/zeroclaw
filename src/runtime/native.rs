@@ -39,9 +39,23 @@ impl RuntimeAdapter for NativeRuntime {
         command: &str,
         workspace_dir: &Path,
     ) -> anyhow::Result<tokio::process::Command> {
+         #[cfg(not(target_os = "windows"))]
+    {
         let mut process = tokio::process::Command::new("sh");
         process.arg("-c").arg(command).current_dir(workspace_dir);
         Ok(process)
+    }
+    #[cfg(target_os = "windows")]
+    {
+        // 使用 cmd.exe 执行命令
+        let full_command = format!("chcp 65001 > nul && {}", command);
+        let mut process = tokio::process::Command::new("cmd");
+        process.arg("/c").arg(full_command).current_dir(workspace_dir);
+        Ok(process)
+    }
+        // let mut process = tokio::process::Command::new("sh");
+        // process.arg("-c").arg(command).current_dir(workspace_dir);
+        // Ok(process)
     }
 }
 
