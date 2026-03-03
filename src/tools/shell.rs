@@ -208,7 +208,7 @@ impl Tool for ShellTool {
                 error: Some("Rate limit exceeded: action budget exhausted".into()),
             });
         }
-
+        tracing::debug!("shell command= {}",&command );
         // Execute with timeout to prevent hanging commands.
         // Clear the environment to prevent leaking API keys and other secrets
         // (CWE-200), then re-add only safe, functional variables.
@@ -238,10 +238,10 @@ impl Tool for ShellTool {
        
         match result {
             Ok(Ok(output)) => {
-                 tracing::debug!("shell stdout= {},stderr={}",&output.stdout,&output.stderr  );
+                 
                 let mut stdout = String::from_utf8_lossy(&output.stdout).to_string();
                 let mut stderr = String::from_utf8_lossy(&output.stderr).to_string();
-                  
+                  tracing::debug!("shell stdout= {},stderr={}",&stdout,&stderr  );
                 // Truncate output to prevent OOM
                 if stdout.len() > MAX_OUTPUT_BYTES {
                     truncate_utf8_to_max_bytes(&mut stdout, MAX_OUTPUT_BYTES);
@@ -272,7 +272,7 @@ impl Tool for ShellTool {
                 })
             }
             Ok(Err(e)) =>{
-                 tracing::debug!("shell Failed to execute command: {e}"  );
+                 tracing::warn!("shell Failed to execute command: {e}"  );
                  Ok(ToolResult {
                 success: false,
                 output: String::new(),

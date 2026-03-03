@@ -77,9 +77,9 @@ where
     if is_windows {
         for (name, kind) in [
             // ("bash", ShellKind::Bash),
-            ("sh", ShellKind::Sh),
-            ("pwsh", ShellKind::Pwsh),
-            ("powershell", ShellKind::PowerShell),
+            // ("sh", ShellKind::Sh),
+            // ("pwsh", ShellKind::Pwsh),
+            // ("powershell", ShellKind::PowerShell),
             ("cmd", ShellKind::Cmd),
             ("cmd.exe", ShellKind::Cmd),
         ] {

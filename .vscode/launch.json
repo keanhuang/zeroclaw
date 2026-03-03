@@ -52,7 +52,11 @@
                     "--package=zeroclaw"
                 ]
             },
-            "args": ["agent"]
+            "args": ["agent"] ,
+            "env":{
+                "RUST_LOG":"debug",
+                "target-async":"off"
+            }
         },
         {
             "name": "Debug unit tests in executable 'zeroclaw'",
