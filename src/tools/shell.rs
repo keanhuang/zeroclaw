@@ -15,6 +15,7 @@ const MAX_OUTPUT_BYTES: usize = 1_048_576;
 /// Environment variables safe to pass to shell commands.
 /// Only functional variables are included — never API keys or secrets.
 const SAFE_ENV_VARS: &[&str] = &[
+    "SystemRoot",
     "PATH",
     "HOME",
     "TERM",
@@ -234,12 +235,13 @@ impl Tool for ShellTool {
 
         let result =
             tokio::time::timeout(Duration::from_secs(SHELL_TIMEOUT_SECS), cmd.output()).await;
-
+       
         match result {
             Ok(Ok(output)) => {
+                 tracing::debug!("shell stdout= {},stderr={}",&output.stdout,&output.stderr  );
                 let mut stdout = String::from_utf8_lossy(&output.stdout).to_string();
                 let mut stderr = String::from_utf8_lossy(&output.stderr).to_string();
-
+                  
                 // Truncate output to prevent OOM
                 if stdout.len() > MAX_OUTPUT_BYTES {
                     truncate_utf8_to_max_bytes(&mut stdout, MAX_OUTPUT_BYTES);
@@ -269,11 +271,14 @@ impl Tool for ShellTool {
                     },
                 })
             }
-            Ok(Err(e)) => Ok(ToolResult {
+            Ok(Err(e)) =>{
+                 tracing::debug!("shell Failed to execute command: {e}"  );
+                 Ok(ToolResult {
                 success: false,
                 output: String::new(),
                 error: Some(format!("Failed to execute command: {e}")),
-            }),
+            })
+            } 
             Err(_) => Ok(ToolResult {
                 success: false,
                 output: String::new(),
