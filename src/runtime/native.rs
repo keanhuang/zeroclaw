@@ -76,7 +76,7 @@ where
 {
     if is_windows {
         for (name, kind) in [
-            ("bash", ShellKind::Bash),
+            // ("bash", ShellKind::Bash),
             ("sh", ShellKind::Sh),
             ("pwsh", ShellKind::Pwsh),
             ("powershell", ShellKind::PowerShell),
@@ -84,15 +84,18 @@ where
             ("cmd.exe", ShellKind::Cmd),
         ] {
             if let Some(program) = resolve(name) {
+                tracing::debug!("native_shell {}",&name);
                 return Some(ShellProgram { kind, program });
             }
         }
         if let Some(program) = comspec {
+            tracing::debug!("native_shell cmd"  );
             return Some(ShellProgram {
                 kind: ShellKind::Cmd,
                 program,
             });
         }
+          tracing::debug!("native_shell none"  );
         return None;
     }
 
